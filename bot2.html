@@ -6,13 +6,13 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover, maximum-scale=1, user-scalable=no">
 <meta name="theme-color" content="#bfe6f7">
 <meta name="format-detection" content="telephone=no">
-<title>とうじょうRMO 妖精とおはなし</title>
+<title>とうじょうRMO Botとおはなし</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Dela+Gothic+One&family=Zen+Maru+Gothic:wght@500;700;900&family=Noto+Sans+JP:wght@400;500;700&display=swap" rel="stylesheet">
 <style>
 /* =========================================================
-   とうじょうRMO 妖精とおはなし（ゲームUI版 / bot2.html）
+   とうじょうRMO Botとおはなし（ゲームUI版 / bot2.html）
    - キャラを大きく表示し、ノベルゲーム風の会話ウィンドウで返答
    - 選択肢ボタン（最初のみ） / 会話ログ
    ========================================================= */
@@ -280,7 +280,7 @@ button { cursor: pointer; }
     <div class="status">
       <div class="status-face" id="statusFace"></div>
       <div class="status-body">
-        <div class="status-name">RMOの妖精</div>
+        <div class="status-name">RMO Bot</div>
         <div class="status-sub">とうじょうRMO</div>
       </div>
     </div>
@@ -304,7 +304,7 @@ button { cursor: pointer; }
   <div class="dialog-area">
     <div class="player-line" id="playerLine" hidden><span id="playerText"></span></div>
     <div class="dialog" id="dialog" aria-live="polite">
-      <span class="nametag" id="nametag">RMOの妖精</span>
+      <span class="nametag" id="nametag">RMO Bot</span>
       <div class="dialog-scroll" id="dialogScroll"></div>
       <div class="choices" id="choices"></div>
       <span class="next" aria-hidden="true"></span>
@@ -315,7 +315,7 @@ button { cursor: pointer; }
   <div class="input-bar">
     <form class="composer" id="form" autocomplete="off">
       <label for="input" class="sr-only">質問を入力</label>
-      <textarea id="input" rows="1" maxlength="1200" enterkeyhint="send" placeholder="妖精に話しかけてね"></textarea>
+      <textarea id="input" rows="1" maxlength="1200" enterkeyhint="send" placeholder="Botに話しかけてね"></textarea>
       <button type="submit" class="send-btn" id="send" aria-label="送信">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
           <line x1="22" y1="2" x2="11" y2="13"></line><polygon points="22 2 15 22 11 13 2 9 22 2"></polygon>
@@ -323,7 +323,7 @@ button { cursor: pointer; }
       </button>
     </form>
     <div class="input-foot">
-      <span>※AIの妖精がお答えします。くわしくは事務局にご確認ください。</span>
+      <span>※AI Botがお答えします。くわしくは事務局にご確認ください。</span>
       <span class="counter" id="counter"></span>
     </div>
   </div>
@@ -344,15 +344,15 @@ button { cursor: pointer; }
   // ===== 設定（bot.html と同じ） =====
   var GAS_ENDPOINT = 'https://script.google.com/macros/s/AKfycbwyNSdhkTZ5b8HCTXBGhIHOaYQrvg8vyohEws7m7rbP_wbyLkz_--m5tJbaSujH2G5dzw/exec';
   var IMG_BASE = 'images/';
-  var CHARA_ALT = 'とうじょうRMOの妖精';
+  var CHARA_ALT = 'とうじょうRMO Bot';
   var MAX_CHARS = 1000;
   var MAX_HISTORY_TURNS = 6;
   var GREETING = 'やっほー！ とうじょうRMOのこと、なんでも聞いてね！';
   var GREETING_SUB = '下の選択肢をえらぶか、自由に話しかけてね。';
   var EXAMPLES = [
-    'とうじょうRMOってなに？',
-    'どんな課題があるの？',
     'スマート農業って何？',
+    '地域にはどんな課題があるの？',
+    'とうじょうRMOってなに？',
     'わたしも参加できる？'
   ];
   var POKE_LINES = [
@@ -515,7 +515,7 @@ button { cursor: pointer; }
   // ===== 会話ウィンドウ =====
   function setDialogError(isErr) {
     els.dialog.classList.toggle('error', !!isErr);
-    els.nametag.textContent = isErr ? 'おっと…' : 'RMOの妖精';
+    els.nametag.textContent = isErr ? 'おっと…' : 'RMO Bot';
   }
   function showPlayerLine(text) {
     if (!text) { els.playerLine.hidden = true; return; }
