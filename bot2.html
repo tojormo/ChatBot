@@ -330,7 +330,7 @@ button { cursor: pointer; }
       </button>
     </form>
     <div class="input-foot">
-      <span>※AI Botがお答えします。くわしくは事務局にご確認ください。</span>
+      <span>※Botがお答えします。回答できないことは事務局にご確認ください。</span>
       <span class="counter" id="counter"></span>
     </div>
   </div>
@@ -366,7 +366,7 @@ button { cursor: pointer; }
     'わっ！くすぐったいよ〜',
     '東条のお米、おいしいんだよ！',
     '気になることがあったら、下から話しかけてね！',
-    '山田錦って知ってる？酒米なんだ！'
+    '山田錦って知ってる？東条はすごく有名な産地なんだ！'
   ];
 
   var state = { history: [], log: [], asked: {}, busy: false, typing: null };
@@ -528,7 +528,7 @@ button { cursor: pointer; }
   // ===== 会話ウィンドウ =====
   function setDialogError(isErr) {
     els.dialog.classList.toggle('error', !!isErr);
-    els.nametag.textContent = isErr ? 'おっと…' : 'RMO Bot';
+    els.nametag.textContent = isErr ? 'おっと…' : 'Bot';
   }
   function showPlayerLine(text) {
     if (!text) { els.playerLine.hidden = true; return; }
