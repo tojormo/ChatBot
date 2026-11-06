@@ -369,7 +369,7 @@ button { cursor: pointer; }
     '山田錦って知ってる？酒米なんだ！'
   ];
 
-  var state = { history: [], log: [], busy: false, typing: null };
+  var state = { history: [], log: [], asked: {}, busy: false, typing: null };
   var els = {};
   var HAS_GAS = typeof google !== 'undefined' && google.script && google.script.run;
 
@@ -541,6 +541,11 @@ button { cursor: pointer; }
     for (var i = a.length - 1; i > 0; i--) { var j = Math.floor(Math.random() * (i + 1)); var t = a[i]; a[i] = a[j]; a[j] = t; }
     return a;
   }
+  // まだ聞いていない選択肢をランダム順で返す（全部聞いたら4つすべてに戻す）
+  function nextChoices() {
+    var rest = EXAMPLES.filter(function (q) { return !state.asked[q]; });
+    return shuffled(rest.length ? rest : EXAMPLES);
+  }
   function renderChoices(list) {
     els.choices.innerHTML = '';
     if (!list || !list.length) { els.choices.hidden = true; return; }
@@ -560,7 +565,7 @@ button { cursor: pointer; }
     els.dialogScroll.scrollTop = 0;
     typeInto(els.dialogScroll,
       '<p class="greet">' + esc(GREETING) + '</p><p class="sub">' + esc(GREETING_SUB) + '</p>');
-    renderChoices(shuffled(EXAMPLES));   // 文字送りを待たずにすぐ表示（毎回ランダム順）
+    renderChoices(nextChoices());   // 文字送りを待たずにすぐ表示（毎回ランダム順）
     setMood('happy', 1200);
   }
   function showThinking() {
@@ -588,7 +593,7 @@ button { cursor: pointer; }
     els.dialogScroll.scrollTop = 0;
     var html = '<div class="md">' + renderMarkdown(res.answer) + '</div>';
     if (res.truncated) html += '<div class="notice">※ 文章が長いため途中で終了しました。質問を分けて試してみてね。</div>';
-    typeInto(els.dialogScroll, html);   // 2ターン目以降は選択肢を出さない
+    typeInto(els.dialogScroll, html, function () { renderChoices(nextChoices()); });   // 回答を表示しきったら選択肢を出す
   }
   function showError(message, retryQuestion) {
     setDialogError(true);
@@ -612,7 +617,7 @@ button { cursor: pointer; }
     renderChoices([]);
     var line = POKE_LINES[Math.floor(Math.random() * POKE_LINES.length)];
     typeInto(els.dialogScroll, '<p class="greet">' + esc(line) + '</p>');
-    if (!state.log.length) renderChoices(shuffled(EXAMPLES));
+    renderChoices(nextChoices());
     setMood('happy', 1100);
   }
 
@@ -687,6 +692,7 @@ button { cursor: pointer; }
     if (q.length > MAX_CHARS) { showError('質問は ' + MAX_CHARS + ' 文字以内にしてね！'); return; }
     showPlayerLine(q);
     if (!opts.retry) addLog('user', q);
+    state.asked[q] = true;
     setBusy(true);
     var thinking = showThinking();
     var payload = { question: q, history: state.history.slice(-MAX_HISTORY_TURNS * 2) };
@@ -742,7 +748,7 @@ button { cursor: pointer; }
 
   function resetGame() {
     if (state.busy) return;
-    state.history = []; state.log = [];
+    state.history = []; state.log = []; state.asked = {};
     els.input.value = ''; autoGrow(); updateCounter();
     showWelcome();
   }
