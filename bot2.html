@@ -7,9 +7,15 @@
 <meta name="theme-color" content="#bfe6f7">
 <meta name="format-detection" content="telephone=no">
 <title>とうじょうRMO Botとおはなし</title>
+<!-- 表示高速化：キャラ画像を最優先で取得 / API・フォントの接続を先に確立 -->
+<link rel="preload" as="image" href="images/chara-full_nograin.png" fetchpriority="high">
+<link rel="preconnect" href="https://script.google.com">
+<link rel="preconnect" href="https://script.googleusercontent.com">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Dela+Gothic+One&family=Zen+Maru+Gothic:wght@500;700;900&family=Noto+Sans+JP:wght@400;500;700&display=swap" rel="stylesheet">
+<!-- フォントは描画をブロックしない読み込み（丸ゴシック1書体・2ウェイトのみ。本文はOS標準フォント） -->
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Zen+Maru+Gothic:wght@700;900&display=swap" media="print" onload="this.media='all'">
+<noscript><link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Zen+Maru+Gothic:wght@700;900&display=swap"></noscript>
 <style>
 /* =========================================================
    とうじょうRMO Botとおはなし（ゲームUI版 / bot2.html）
@@ -28,15 +34,16 @@
   --pink: #ff7a9c;
   --danger: #d9383a;
   --grad: linear-gradient(135deg, #4cb36a 0%, #2f7a43 100%);
-  --round: "Zen Maru Gothic", "Noto Sans JP", sans-serif;
-  --game: "Dela Gothic One", "Zen Maru Gothic", sans-serif;
+  --sys: -apple-system, BlinkMacSystemFont, "Hiragino Sans", "Hiragino Kaku Gothic ProN", "Yu Gothic UI", "Yu Gothic", Meiryo, sans-serif;
+  --round: "Zen Maru Gothic", var(--sys);
+  --game: "Zen Maru Gothic", var(--sys);
   --ease: cubic-bezier(.22,.61,.36,1);
   --pop: cubic-bezier(.34,1.56,.64,1);
 }
 html, body {
   height: 100%; overflow: hidden; overscroll-behavior: none;
   background: #bfe6f7; color: var(--ink);
-  font-family: "Noto Sans JP", sans-serif; line-height: 1.75;
+  font-family: var(--sys); line-height: 1.75;
   -webkit-font-smoothing: antialiased; -webkit-text-size-adjust: 100%; text-size-adjust: 100%;
   touch-action: manipulation;
 }
@@ -58,14 +65,14 @@ button { cursor: pointer; }
 .sun { position: absolute; top: 12%; right: 12%; width: 74px; height: 74px; border-radius: 50%;
   background: radial-gradient(circle, #fff6c9 0 40%, var(--sun) 41% 100%);
   box-shadow: 0 0 0 14px rgba(255,210,77,.18), 0 0 0 30px rgba(255,210,77,.08); }
-.cloud { position: absolute; height: 26px; border-radius: 30px; background: #fff; opacity: .9; animation: cloud 38s linear infinite; }
+.cloud { position: absolute; height: 26px; border-radius: 30px; background: #fff; opacity: .9; animation: cloud 38s linear infinite; will-change: transform; }
 .cloud::before, .cloud::after { content: ""; position: absolute; background: #fff; border-radius: 50%; }
 .cloud::before { width: 34px; height: 34px; left: 14px; top: -16px; }
 .cloud::after { width: 24px; height: 24px; left: 40px; top: -10px; }
-.cloud.c1 { width: 90px; top: 17%; left: -100px; }
-.cloud.c2 { width: 70px; top: 28%; left: -100px; animation-duration: 52s; animation-delay: -26s; transform: scale(.8); opacity: .75; }
+.cloud.c1 { width: 90px; top: 17%; left: -120px; }
+.cloud.c2 { width: 56px; top: 28%; left: -120px; animation-duration: 52s; animation-delay: -26s; opacity: .75; }
 .cloud.c3 { width: 110px; top: 9%; left: -120px; animation-duration: 64s; animation-delay: -44s; opacity: .8; }
-@keyframes cloud { to { left: 110%; } }
+@keyframes cloud { from { transform: translateX(0); } to { transform: translateX(calc(100vw + 260px)); } }
 .hill { position: absolute; border-radius: 50%; }
 .hill.h1 { width: 140%; height: 46%; left: -50%; bottom: 14%; background: #9fd6a8; }
 .hill.h2 { width: 130%; height: 42%; right: -55%; bottom: 10%; background: #7cc68a; }
@@ -106,7 +113,7 @@ button { cursor: pointer; }
   padding-top: 10px; margin-bottom: -34px; -webkit-tap-highlight-color: transparent; cursor: pointer; }
 .chara img { height: 100%; width: auto; max-width: 86vw; object-fit: contain; object-position: bottom; display: block;
   transform-origin: 50% 100%; filter: drop-shadow(0 10px 12px rgba(31,85,48,.25));
-  animation: breathe 3.2s ease-in-out infinite; }
+  animation: breathe 3.2s ease-in-out infinite; will-change: transform; }
 .chara img.fallback { border-radius: 50%; height: 60%; }
 .chara::after { content: ""; position: absolute; bottom: 30px; left: 50%; width: 46%; height: 14px; transform: translateX(-50%);
   border-radius: 50%; background: rgba(31,85,48,.22); filter: blur(3px); z-index: -1; }
@@ -155,7 +162,7 @@ button { cursor: pointer; }
 .dialog-scroll { max-height: calc(var(--app-h, 100dvh) * .34); min-height: 52px; overflow-y: auto; overscroll-behavior: contain;
   -webkit-overflow-scrolling: touch; font-size: .95rem; line-height: 1.8; padding-right: 2px; }
 .dialog-scroll .greet { font-family: var(--round); font-weight: 900; font-size: 1.08rem; color: var(--green-deep); line-height: 1.6; }
-.dialog-scroll .sub { font-family: var(--round); font-weight: 500; font-size: .8rem; color: var(--ink-soft); margin-top: 2px; }
+.dialog-scroll .sub { font-family: var(--round); font-weight: 700; font-size: .8rem; color: var(--ink-soft); margin-top: 2px; }
 .dialog-scroll .err { color: var(--danger); font-weight: 500; }
 .next { position: absolute; right: 16px; bottom: 6px; width: 0; height: 0; border-style: solid; border-width: 9px 7px 0;
   border-color: var(--leaf) transparent transparent; opacity: 0; }
@@ -230,7 +237,7 @@ button { cursor: pointer; }
   box-shadow: 0 -10px 30px rgba(0,0,0,.2); animation: sheetUp .3s var(--ease); }
 @keyframes sheetUp { from { transform: translateY(40%); opacity: .4; } }
 .log-head { display: flex; align-items: center; justify-content: space-between; padding: 14px 16px 10px; border-bottom: 2px dashed var(--mint); }
-.log-head h2 { font-family: var(--game); font-weight: 400; font-size: 1rem; color: var(--green-deep); letter-spacing: .08em; }
+.log-head h2 { font-family: var(--game); font-weight: 900; font-size: 1rem; color: var(--green-deep); letter-spacing: .08em; }
 .log-close { min-width: 44px; min-height: 36px; border: none; border-radius: 999px; background: var(--mint); color: var(--green-deep);
   font-family: var(--round); font-weight: 900; font-size: .8rem; padding: 0 14px; }
 .log-body { flex: 1; overflow-y: auto; padding: 12px 12px calc(16px + env(safe-area-inset-bottom)); overscroll-behavior: contain; }
@@ -278,7 +285,7 @@ button { cursor: pointer; }
   <!-- HUD -->
   <div class="hud">
     <div class="status">
-      <div class="status-face" id="statusFace"></div>
+      <div class="status-face" id="statusFace"><img src="images/chara-face_s.png" width="128" height="119" alt="" decoding="async"></div>
       <div class="status-body">
         <div class="status-name">RMO Bot</div>
         <div class="status-sub">とうじょうRMO</div>
@@ -297,7 +304,7 @@ button { cursor: pointer; }
   <!-- キャラクター -->
   <div class="stage">
     <div class="think-bubble" aria-hidden="true"><span class="dots"><i></i><i></i><i></i></span></div>
-    <div class="chara" id="chara" title="タップしてね"></div>
+    <div class="chara" id="chara" title="タップしてね"><img src="images/chara-full_nograin.png" width="900" height="900" alt="とうじょうRMO Bot" fetchpriority="high" decoding="async"></div>
   </div>
 
   <!-- 会話ウィンドウ -->
@@ -341,7 +348,7 @@ button { cursor: pointer; }
 </div>
 
 <script>
-  // ===== 設定（bot.html と同じ） =====
+  // ===== 設定（bot1.html と同じ） =====
   var GAS_ENDPOINT = 'https://script.google.com/macros/s/AKfycbwyNSdhkTZ5b8HCTXBGhIHOaYQrvg8vyohEws7m7rbP_wbyLkz_--m5tJbaSujH2G5dzw/exec';
   var IMG_BASE = 'images/';
   var CHARA_ALT = 'とうじょうRMO Bot';
@@ -374,19 +381,25 @@ button { cursor: pointer; }
     '<circle cx="26" cy="28" r="3.2" fill="#245e34"/><circle cx="38" cy="28" r="3.2" fill="#245e34"/>' +
     '<path d="M28 37 Q32 41 36 37" stroke="#245e34" stroke-width="2.6" fill="none" stroke-linecap="round"/>' +
     '</svg>');
+  function useFallback(img, kind) {
+    img.src = FALLBACK_FACE;
+    if (kind === 'full') img.classList.add('fallback');
+  }
+  function guardImg(img, kind) {   // HTMLに書いた画像の読み込み失敗時の保険
+    if (!img) return;
+    if (img.complete && !img.naturalWidth) { useFallback(img, kind); return; }
+    img.addEventListener('error', function onErr() { img.removeEventListener('error', onErr); useFallback(img, kind); });
+  }
   function charaImg(kind, alt) {
     var img = document.createElement('img');
     img.alt = alt || '';
-    img.addEventListener('error', function onErr() {
-      img.removeEventListener('error', onErr);
-      img.src = FALLBACK_FACE;
-      if (kind === 'full') img.classList.add('fallback');
-    });
-    img.src = IMG_BASE + (kind === 'full' ? 'chara-full_nograin.png' : 'chara-face.png');
+    img.decoding = 'async';
+    guardImg(img, kind);
+    img.src = IMG_BASE + (kind === 'full' ? 'chara-full_nograin.png' : 'chara-face_s.png');
     return img;
   }
 
-  // ===== HTML エスケープ + Markdown（bot.html と同じ） =====
+  // ===== HTML エスケープ + Markdown（bot1.html と同じ） =====
   function esc(s) {
     return String(s).replace(/[&<>"']/g, function (c) {
       return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c];
@@ -492,7 +505,7 @@ button { cursor: pointer; }
     var t = { nodes: nodes, texts: texts, onDone: onDone, cursor: el('span', 'cursor'), pend: pend };
     state.typing = t;
     if (reduce || !total) { stopTyping(true); return; }
-    var step = Math.max(1, Math.ceil(total / 140));   // 長い回答でも約4秒以内に表示しきる
+    var step = Math.max(2, Math.ceil(total / 60));    // 長い回答でも約1秒で表示しきる
     var ni = 0, ci = 0;
     els.game.classList.add('is-talking');
     t.timer = setInterval(function () {
@@ -509,7 +522,7 @@ button { cursor: pointer; }
       if (ni >= nodes.length) { stopTyping(false); return; }
       var sc = els.dialogScroll;
       if (sc.scrollHeight - sc.scrollTop - sc.clientHeight < 60) sc.scrollTop = sc.scrollHeight;
-    }, 28);
+    }, 16);
   }
 
   // ===== 会話ウィンドウ =====
@@ -522,6 +535,11 @@ button { cursor: pointer; }
     els.playerText.textContent = text;
     els.playerLine.hidden = false;
     var s = els.playerText; s.style.animation = 'none'; void s.offsetWidth; s.style.animation = '';
+  }
+  function shuffled(arr) {   // Fisher–Yates
+    var a = arr.slice();
+    for (var i = a.length - 1; i > 0; i--) { var j = Math.floor(Math.random() * (i + 1)); var t = a[i]; a[i] = a[j]; a[j] = t; }
+    return a;
   }
   function renderChoices(list) {
     els.choices.innerHTML = '';
@@ -541,8 +559,8 @@ button { cursor: pointer; }
     renderChoices([]);
     els.dialogScroll.scrollTop = 0;
     typeInto(els.dialogScroll,
-      '<p class="greet">' + esc(GREETING) + '</p><p class="sub">' + esc(GREETING_SUB) + '</p>',
-      function () { renderChoices(EXAMPLES); });
+      '<p class="greet">' + esc(GREETING) + '</p><p class="sub">' + esc(GREETING_SUB) + '</p>');
+    renderChoices(shuffled(EXAMPLES));   // 文字送りを待たずにすぐ表示（毎回ランダム順）
     setMood('happy', 1200);
   }
   function showThinking() {
@@ -593,9 +611,8 @@ button { cursor: pointer; }
     showPlayerLine('');
     renderChoices([]);
     var line = POKE_LINES[Math.floor(Math.random() * POKE_LINES.length)];
-    typeInto(els.dialogScroll, '<p class="greet">' + esc(line) + '</p>', function () {
-      if (!state.log.length) renderChoices(EXAMPLES);
-    });
+    typeInto(els.dialogScroll, '<p class="greet">' + esc(line) + '</p>');
+    if (!state.log.length) renderChoices(shuffled(EXAMPLES));
     setMood('happy', 1100);
   }
 
@@ -622,7 +639,7 @@ button { cursor: pointer; }
   }
   function closeLog() { els.log.hidden = true; els.logBtn.focus(); }
 
-  // ===== サーバー呼び出し（bot.html と同じ） =====
+  // ===== サーバー呼び出し（bot1.html と同じ） =====
   function clientId() {
     try {
       var id = localStorage.getItem('chat_cid');
@@ -648,6 +665,12 @@ button { cursor: pointer; }
       ok: true, elapsedMs: 1200,
       answer: '（プレビュー表示だよ！GASと連携すると本番の回答が返ってくるよ）\n\n**とうじょうRMO**は、東条地域の「岡本・森・南山」のみんなが手を取り合って、農業と豊かな暮らしを未来につなぐためのチームだよ！\n\n- お米（酒米・山田錦）の畑や水路を守る\n- スマート農業で、作業を少しでも楽にする\n- おじいちゃん・おばあちゃんと若い世代が一緒に活動する\n\nこんなことを進めているんだ！'
     };
+  }
+
+  // ページを開いた時点でGASを起こしておく（最初の質問の待ち時間を短縮）
+  function warmUp() {
+    if (HAS_GAS || !GAS_ENDPOINT || !window.fetch) return;
+    try { fetch(GAS_ENDPOINT + '?warmup=1', { method: 'GET', mode: 'no-cors', cache: 'no-store' }).catch(function () {}); } catch (e) {}
   }
 
   // ===== 送信 =====
@@ -754,8 +777,8 @@ button { cursor: pointer; }
      'counter', 'log', 'logBody', 'logBtn', 'logClose', 'resetBtn', 'statusFace']
       .forEach(function (id) { els[id] = document.getElementById(id); });
 
-    els.chara.appendChild(charaImg('full', CHARA_ALT));
-    els.statusFace.appendChild(charaImg('face', ''));
+    guardImg(els.chara.querySelector('img'), 'full');
+    guardImg(els.statusFace.querySelector('img'), 'face');
     els.chara.addEventListener('click', pokeChara);
     // 会話ウィンドウをタップ → 文字送りをスキップ
     els.dialog.addEventListener('click', function (e) {
@@ -770,6 +793,7 @@ button { cursor: pointer; }
     bindComposer();
     bindViewport();
     showWelcome();
+    warmUp();
   }
   if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', init);
   else init();
